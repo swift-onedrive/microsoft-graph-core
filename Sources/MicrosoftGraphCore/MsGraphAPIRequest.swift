@@ -19,23 +19,22 @@ public protocol MsGraphAPIRequest: AnyObject {
     
     /// As part of an API request this returns a valid OAuth token to use with any of the MsGraph.
     /// - Parameter closure: The closure to be executed with the valid access token.
-    func withToken<MicrosoftAzureModel>(_ closure: @escaping (OAuthAccessToken) -> EventLoopFuture<MicrosoftAzureModel>) -> EventLoopFuture<MicrosoftAzureModel>
+    func withToken<MicrosoftAzureModel>(_ closure: @escaping (OAuthAccessToken) async throws -> MicrosoftAzureModel) async throws -> MicrosoftAzureModel
 }
 
 extension MsGraphAPIRequest {
-    public func withToken<MicrosoftAzureModel>(_ closure: @escaping (OAuthAccessToken) -> EventLoopFuture<MicrosoftAzureModel>) -> EventLoopFuture<MicrosoftAzureModel> {
+    
+    public func withToken<MicrosoftAzureModel>(_ closure: @escaping (OAuthAccessToken) async throws -> MicrosoftAzureModel) async throws -> MicrosoftAzureModel {
         guard let token = currentToken,
             let created = tokenCreatedTime,
             refreshableToken.isFresh(token: token, created: created) else {
-            return refreshableToken.refresh().flatMap { newToken in
-                self.currentToken = newToken
-                self.tokenCreatedTime = Date()
-
-                return closure(newToken)
-            }
+            let newToken = try await refreshableToken.refresh()
+            self.currentToken = newToken
+            self.tokenCreatedTime = Date()
+            return try await closure(newToken)
         }
 
-        return closure(token)
+        return try await closure(token)
     }
 
 }

@@ -15,7 +15,7 @@ let MsGraphOauthTokenAudience = MsGraphOauthTokenUrl
 
 public protocol OAuthRefreshable {
     func isFresh(token: OAuthAccessToken, created: Date) -> Bool
-    func refresh() -> EventLoopFuture<OAuthAccessToken>
+    func refresh() async throws -> OAuthAccessToken
 }
 
 extension OAuthRefreshable {
