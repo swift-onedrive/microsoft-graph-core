@@ -8,6 +8,7 @@
 import Foundation
 import NIOHTTP1
 import AsyncHTTPClient
+import NIOFoundationCompat
 import NIO
 
 public final class OAuthServiceAccount: OAuthRefreshable {
